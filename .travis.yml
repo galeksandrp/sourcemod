@@ -31,3 +31,4 @@ script:
   - PATH="~/.local/bin:$PATH"
   - CC=clang-3.8 CXX=clang-3.8 python ../configure.py --enable-optimize --sdks=episode1,tf2,l4d2,csgo,dota
   - ambuild
+
