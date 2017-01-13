@@ -11,6 +11,8 @@ script:
 - ln -s sourcemod $TRAVIS_BUILD_DIR
 - cd $TRAVIS_BUILD_DIR
 - wget http://www.gsptalk.com/mirror/sourcemod/mmsource-1.10.6-linux.tar.gz -O - | tar xz -C ~/css/cstrike
-- wget $(echo "https://sm.alliedmods.net/smdrop/$(cat product.version | grep -o '[0-9]*\.[0-9]*' | head -1)/sourcemod-$(cat product.version)-git$(git log --oneline $(git merge-base master HEAD) | wc -l)-linux.tar.gz") -O - | tar xz -C ~/css/cstrike
+- git remote add upstream https://github.com/alliedmodders/sourcemod.git
+- git fetch upstream master
+- wget $(echo "https://sm.alliedmods.net/smdrop/$(cat product.version | grep -o '[0-9]*\.[0-9]*' | head -1)/sourcemod-$(cat product.version)-git$(git log --oneline $(git merge-base upstream/master $TRAVIS_COMMIT) | wc -l)-linux.tar.gz") -O - | tar xz -C ~/css/cstrike
 notifications:
   email: false
