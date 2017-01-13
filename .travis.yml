@@ -1,7 +1,16 @@
+addons:
+  apt:
+    packages:
+    - lib32gcc1
+install:
+- wget http://media.steampowered.com/client/installer/steamcmd_linux.tar.gz -O - | tar xz
+- ./steamcmd.sh +login anonymous +force_install_dir ~/css +app_update 232330 +quit
 script:
-- mkdir -p ~/css/addons
-- cd ~/css/addons
+- mkdir -p ~/css/cstrike/addons
+- cd ~/css/cstrike/addons
 - ln -s sourcemod $TRAVIS_BUILD_DIR
 - cd $TRAVIS_BUILD_DIR
-- wget http://www.gsptalk.com/mirror/sourcemod/mmsource-1.10.6-linux.tar.gz -O - | tar xz -C ~/css
-- wget $(echo "https://sm.alliedmods.net/smdrop/$(cat product.version | grep -o '[0-9]*\.[0-9]*' | head -1)/sourcemod-$(cat product.version)-git$(git log --oneline $(git merge-base master HEAD) | wc -l)-linux.tar.gz") -O - | tar xz -C ~/css
+- wget http://www.gsptalk.com/mirror/sourcemod/mmsource-1.10.6-linux.tar.gz -O - | tar xz -C ~/css/cstrike
+- wget $(echo "https://sm.alliedmods.net/smdrop/$(cat product.version | grep -o '[0-9]*\.[0-9]*' | head -1)/sourcemod-$(cat product.version)-git$(git log --oneline $(git merge-base master HEAD) | wc -l)-linux.tar.gz") -O - | tar xz -C ~/css/cstrike
+notifications:
+  email: false
