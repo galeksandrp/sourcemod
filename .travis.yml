@@ -3,17 +3,29 @@ addons:
     packages:
     - lib32gcc1
 install:
-- wget http://media.steampowered.com/client/installer/steamcmd_linux.tar.gz -O - | tar xz
+- mkdir -p ~/steamcmd
+- cd ~/steamcmd
+- wget https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz -O - | tar xz
 - ./steamcmd.sh +login anonymous +force_install_dir ~/css +app_update 232330 +quit
+before_script:
+- wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+- unzip ngrok-stable-linux-amd64.zip
+- ./ngrok authtoken $NG
+- ./ngrok tcp 27015 > /dev/null &
 script:
 - mkdir -p ~/css/cstrike/addons
 - cd ~/css/cstrike/addons
 - ln -s sourcemod $TRAVIS_BUILD_DIR
 - cd $TRAVIS_BUILD_DIR
-- wget http://www.gsptalk.com/mirror/sourcemod/mmsource-1.10.6-linux.tar.gz -O - | tar xz -C ~/css/cstrike
+- >
+  wget $(echo 'http://www.gsptalk.com/mirror/sourcemod/mmsource-1.10.6-linux.tar.gz
+  http://mirror.pointysoftware.net/alliedmodders/mmsource-1.10.6-linux.tar.gz
+  http://cdn.probablyaserver.com/sourcemod/mmsource-1.10.6-linux.tar.gz' | sort -R | head -1) -O - | tar xz -C ~/css/cstrike
 - git fetch --unshallow origin
 - git remote add upstream https://github.com/alliedmodders/sourcemod.git
 - git fetch upstream master
 - wget $(echo "https://sm.alliedmods.net/smdrop/$(cat product.version | grep -o '[0-9]*\.[0-9]*' | head -1)/sourcemod-$(cat product.version)-git$(git log --oneline $(git merge-base upstream/master $TRAVIS_COMMIT) | wc -l)-linux.tar.gz") -O - | tar xz -C ~/css/cstrike
+- cd ~/css
+- srcds -console -game cstrike +map de_dust2
 notifications:
   email: false
