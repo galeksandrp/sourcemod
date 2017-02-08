@@ -1,33 +1,10 @@
-addons:
-  apt:
-    packages:
-    - lib32stdc++6
-    - lib32z1-dev
-    - libc6-dev-i386
-    - linux-libc-dev
-    - g++-multilib
-    - g++-4.8
-    sources:
-    - ubuntu-toolchain-r-test
-  cache:
-    directories:
-    - ../mysql-5.0
-language: cpp
-sudo: false
-compiler:
-  - clang
-env:
-  global:
-  - LLVM_ARCHIVE_URI=http://sourcemod.net/clang+llvm-3.8.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz
-before_install:
-  - wget -nc $LLVM_ARCHIVE_URI -O $HOME/clang+llvm.tar.xz
-  - mkdir -p $HOME/clang+llvm
-  - tar -xf $HOME/clang+llvm.tar.xz -C $HOME/clang+llvm --strip-components 1
-  - export PATH=$HOME/clang+llvm/bin:$PATH
-before_script:
-  - CHECKOUT_DIR=$PWD && cd .. && $CHECKOUT_DIR/tools/checkout-deps.sh && cd $CHECKOUT_DIR
 script:
-  - mkdir build && cd build
-  - PATH="~/.local/bin:$PATH"
-  - CC=clang-3.8 CXX=clang-3.8 python ../configure.py --enable-optimize --sdks=episode1,tf2,l4d2,csgo,dota
-  - ambuild
+- git remote add upstream https://github.com/alliedmodders/sourcemod.git
+- git fetch upstream master
+- echo -e "machine github.com\nlogin $(echo $TRAVIS_REPO_SLUG | cut -d '/' -f 1)\npassword $GITHUB_TOKEN" >> ~/.netrc
+- git push origin upstream/master:master
+branches:
+  except:
+    - /^deploy-.*$/
+notifications:
+  email: false
