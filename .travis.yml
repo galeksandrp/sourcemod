@@ -8,11 +8,6 @@ install:
 - cd ~/steamcmd
 - wget https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz -O - | tar xz
 - ./steamcmd.sh +login anonymous +force_install_dir ~/css +app_update 232330 +quit
-before_script:
-- wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
-- unzip ngrok-stable-linux-amd64.zip
-- ./ngrok authtoken $NG
-- ./ngrok tcp 27015 > /dev/null &
 script:
 - mkdir -p ~/css/cstrike/addons
 - cd ~/css/cstrike/addons
