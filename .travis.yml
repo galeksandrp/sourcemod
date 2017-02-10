@@ -27,7 +27,7 @@ script:
 - git fetch upstream master
 - wget $(echo "https://sm.alliedmods.net/smdrop/$(cat product.version | grep -o '[0-9]*\.[0-9]*' | head -1)/sourcemod-$(cat product.version)-git$(git log --oneline $(git merge-base upstream/master $TRAVIS_COMMIT) | wc -l)-linux.tar.gz") -O - | tar xz -C ~/css/cstrike
 - cd ~/css
-- cstrike/addons/sourcemod/scripting/spcomp cstrike/addons/sourcemod/plugins/test.sp -ocstrike/addons/sourcemod/plugins/test.smx
+- cstrike/addons/sourcemod/scripting/spcomp $TRAVIS_BUILD_DIR/plugins/test.sp -ocstrike/addons/sourcemod/plugins/test.smx
 - ./srcds_run -console -game cstrike +map de_dust2
 notifications:
   email: false
