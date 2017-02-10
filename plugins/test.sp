@@ -13,7 +13,6 @@ public Plugin myinfo =
 
 public OnPluginStart()
 {
-	HookEvent("player_spawn", onPlayerSpawned);
 	HookEvent("round_start", onRoundStart);
 	PrintToServer("OnPluginStart");
 }
