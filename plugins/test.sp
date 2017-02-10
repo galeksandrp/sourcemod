@@ -26,4 +26,5 @@ public onRoundStart(Event event, const char[] name, bool dontBroadcast)
 public Action onTimeEnd(Handle hTimer)
 {
 	PrintToServer("onTimeEnd");
+	ServerCommand("quit");
 }
