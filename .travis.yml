@@ -2,6 +2,7 @@ addons:
   apt:
     packages:
     - lib32gcc1
+    - lib32stdc++6
 install:
 - mkdir -p ~/steamcmd
 - cd ~/steamcmd
