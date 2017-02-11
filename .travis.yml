@@ -13,7 +13,7 @@ addons:
     directories:
     - ../mysql-5.0
 language: cpp
-sudo: false
+sudo: required
 compiler:
   - clang
 env:
@@ -31,3 +31,9 @@ script:
   - PATH="~/.local/bin:$PATH"
   - CC=clang-3.8 CXX=clang-3.8 python ../configure.py --enable-optimize --sdks=episode1,tf2,l4d2,csgo,dota
   - ambuild
+  - docker build -t galeksandrp/travistest:sourcemod
+service:
+ - docker
+after_success:
+- docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+- docker push galeksandrp/travistest:sourcemod;
