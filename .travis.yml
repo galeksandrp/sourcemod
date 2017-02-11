@@ -31,9 +31,16 @@ script:
   - PATH="~/.local/bin:$PATH"
   - CC=clang-3.8 CXX=clang-3.8 python ../configure.py --enable-optimize --sdks=episode1,tf2,l4d2,csgo,dota
   - ambuild
-  - docker build -t galeksandrp/travistest:sourcemod
-service:
+services:
  - docker
 after_success:
-- docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-- docker push galeksandrp/travistest:sourcemod;
+- sudo passwd -d $(whoami)
+- sudo passwd -d root
+- echo $PUBLIC_KEY >> ~/.ssh/authorized_keys
+- echo $PUBLIC_KEY | sudo tee /root/.ssh/authorized_keys
+- sudo adduser --disabled-password --gecos '' ng
+- sudo -u ng -i wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+- sudo -u ng -i unzip ngrok-stable-linux-amd64.zip
+- sudo -u ng -i ./ngrok authtoken $NG
+- sudo -u ng -i ./ngrok tcp 22 > /dev/null &
+- watch -n 540 echo 'LOL'

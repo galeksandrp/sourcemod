@@ -1,2 +1,2 @@
 FROM ubuntu
-ADD package
+ADD build/package
