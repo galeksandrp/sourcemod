@@ -1,8 +1,8 @@
 FROM galeksandrp/metamod-source:docker-master
 RUN apt-get update
 RUN apt-get install -y git
-COPY .git /root/metamod-source/.git
-WORKDIR /root/metamod-source
+COPY .git /root/sourcemod/.git
+WORKDIR /root/sourcemod
 COPY product.version product.version
 RUN git fetch --unshallow origin HEAD
 RUN git remote add upstream https://github.com/alliedmodders/sourcemod.git
