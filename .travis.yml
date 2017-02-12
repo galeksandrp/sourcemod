@@ -1,27 +1,5 @@
-addons:
-  apt:
-    packages:
-    - clang-3.7
-    - lib32stdc++6
-    - lib32z1-dev
-    - libc6-dev-i386
-    - linux-libc-dev
-    - g++-multilib
-    - g++4.8
-    sources:
-    - llvm-toolchain-precise-3.7
-    - ubuntu-toolchain-r-test
-  cache:
-    directories:
-    - ../mysql-5.0
-language: cpp
-sudo: false
-compiler:
-  - clang
-before_script:
-  - CHECKOUT_DIR=$PWD && cd .. && $CHECKOUT_DIR/tools/checkout-deps.sh && cd $CHECKOUT_DIR
-script:
-  - mkdir build && cd build
-  - PATH="~/.local/bin:$PATH"
-  - CC=clang-3.7 CXX=clang-3.7 python ../configure.py --enable-optimize --sdks=episode1,tf2,l4d2,csgo,dota
-  - ambuild
+branches:
+  only:
+    - /^travis-.*$/
+notifications:
+  email: false
