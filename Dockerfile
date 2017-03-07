@@ -1,5 +1,5 @@
 FROM galeksandrp/metamod-source:docker-1.10-dev-user
-RUN root
+USER root
 RUN apt-get update && apt-get install -y git
 WORKDIR /root/sourcemod
 COPY .git .git
