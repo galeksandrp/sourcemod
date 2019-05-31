@@ -223,7 +223,7 @@ void ClientPrefs::DatabaseConnect()
 	}
 
 	const char *identifier = Driver->GetIdentifier();
-
+	Database->LockForFullAtomicOperation();
 	if (strcmp(identifier, "sqlite") == 0)
 	{
 		g_DriverType = Driver_SQLite;
@@ -294,7 +294,7 @@ void ClientPrefs::DatabaseConnect()
 	}
 
 	databaseLoading = false;
-
+	Database->UnlockFromFullAtomicOperation();
 	// Need a new scope because of the goto above.
 	{
 		AutoLock lock(&queryLock);
@@ -303,7 +303,8 @@ void ClientPrefs::DatabaseConnect()
 	return;
 
 fatal_fail:
-	Database = NULL;
+	Database->UnlockFromFullAtomicOperation();
+	Database = nullptr;
 	databaseLoading = false;
 }
 
