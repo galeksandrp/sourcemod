@@ -36,6 +36,8 @@
 #include "cookie.h"
 #include "sh_string.h"
 
+#include <memory>
+
 enum querytype
 {
 	Query_InsertCookie = 0,
@@ -62,7 +64,7 @@ struct ParamData
 	char steamId[MAX_NAME_LENGTH];
 
 	int cookieId;
-	CookieData *data;
+	std::unique_ptr<CookieData> data;
 };
 
 class TQueryOp : public IDBThreadOperation

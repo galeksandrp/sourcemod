@@ -148,11 +148,11 @@ bool TQueryOp::BindParamsAndRun()
 			char safe_name[MAX_NAME_LENGTH*2 + 1];
 			char safe_desc[MAX_DESC_LENGTH*2 + 1];
 			
-			m_database->QuoteString(m_params.cookie->name, 
+			m_database->QuoteString(m_params.cookie->name.c_str(), 
 				safe_name, 
 				sizeof(safe_name),
 				&ignore);
-			m_database->QuoteString(m_params.cookie->description,
+			m_database->QuoteString(m_params.cookie->description.c_str(),
 				safe_desc,
 				sizeof(safe_desc),
 				&ignore);
@@ -218,7 +218,7 @@ bool TQueryOp::BindParamsAndRun()
 				safe_id,
 				sizeof(safe_id),
 				&ignore);
-			m_database->QuoteString(m_params.data->value,
+			m_database->QuoteString(m_params.data->val.c_str(),
 				safe_val,
 				sizeof(safe_val),
 				&ignore);
@@ -305,18 +305,11 @@ int TQueryOp::PullQuerySerial()
 
 ParamData::~ParamData()
 {
-	if (data)
-	{
-		/* Data is only ever passed in a client disconnect query and always needs to be deleted */
-		delete data;
-		data = NULL;
-	}
 }
 
 ParamData::ParamData()
 {
-	cookie = NULL;
-	data = NULL;
+	cookie = nullptr;
 	steamId[0] = '\0';
 	cookieId = 0;
 }

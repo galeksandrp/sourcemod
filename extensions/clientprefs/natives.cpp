@@ -59,7 +59,7 @@ cell_t RegClientPrefCookie(IPluginContext *pContext, const cell_t *params)
 		pCookie, 
 		pContext->GetIdentity(), 
 		myself->GetIdentity(), 
-		NULL);
+		nullptr);
 }
 
 cell_t FindClientPrefCookie(IPluginContext *pContext, const cell_t *params)
@@ -80,7 +80,7 @@ cell_t FindClientPrefCookie(IPluginContext *pContext, const cell_t *params)
 		pCookie, 
 		pContext->GetIdentity(), 
 		myself->GetIdentity(), 
-		NULL);
+		nullptr);
 }
 
 size_t IsAuthIdConnected(char *authID)
@@ -91,7 +91,7 @@ size_t IsAuthIdConnected(char *authID)
 	for (int playerIndex = playerhelpers->GetMaxClients()+1; --playerIndex > 0;)
 	{
 		player = playerhelpers->GetGamePlayer(playerIndex);
-		if (player == NULL || !player->IsAuthorized())
+		if (player == nullptr || !player->IsAuthorized())
 		{
 			continue;
 		}
@@ -120,7 +120,7 @@ cell_t SetAuthIdCookie(IPluginContext *pContext, const cell_t *params)
 	HandleError err;
 	HandleSecurity sec;
  
-	sec.pOwner = NULL;
+	sec.pOwner = nullptr;
 	sec.pIdentity = myself->GetIdentity();
 
 	Cookie *pCookie;
@@ -143,18 +143,18 @@ cell_t SetAuthIdCookie(IPluginContext *pContext, const cell_t *params)
 	}
 
 	// constructor calls strncpy for us
-	CookieData *payload = new CookieData(value);
+	std::unique_ptr<CookieData> payload(new CookieData(value));
 
 	// set changed so players connecting later in during the same map will have the correct value
 	payload->changed = true;
-	payload->timestamp = time(NULL);
+	payload->timestamp = time(nullptr);
 
 	// edit database table
 	TQueryOp *op = new TQueryOp(Query_InsertData, pCookie);
 	// limit player auth length which doubles for cookie name length
 	UTIL_strncpy(op->m_params.steamId, steamID, MAX_NAME_LENGTH);
 	op->m_params.cookieId = i_dbId;
-	op->m_params.data = payload;
+	op->m_params.data = std::move(payload);
 
 	g_ClientPrefs.AddQueryToQueue(op);
 
@@ -176,7 +176,7 @@ cell_t SetClientPrefCookie(IPluginContext *pContext, const cell_t *params)
 	HandleError err;
 	HandleSecurity sec;
  
-	sec.pOwner = NULL;
+	sec.pOwner = nullptr;
 	sec.pIdentity = myself->GetIdentity();
 
 	Cookie *pCookie;
@@ -208,7 +208,7 @@ cell_t GetClientPrefCookie(IPluginContext *pContext, const cell_t *params)
 	HandleError err;
 	HandleSecurity sec;
  
-	sec.pOwner = NULL;
+	sec.pOwner = nullptr;
 	sec.pIdentity = myself->GetIdentity();
 
 	Cookie *pCookie;
@@ -219,12 +219,10 @@ cell_t GetClientPrefCookie(IPluginContext *pContext, const cell_t *params)
 		return pContext->ThrowNativeError("Invalid Cookie handle %x (error %d)", hndl, err);
 	}
 	
-	char *value = NULL;
+	std::string value;
+	g_CookieManager.GetCookieValue(pCookie, client, value);
 
-	g_CookieManager.GetCookieValue(pCookie, client, &value);
-
-	pContext->StringToLocal(params[3], params[4], value);
-
+	pContext->StringToLocal(params[3], params[4], value.c_str());
 	return 1;
 }
 
@@ -233,7 +231,6 @@ cell_t AreClientCookiesCached(IPluginContext *pContext, const cell_t *params)
 	g_ClientPrefs.AttemptReconnection();
 
 	int client = params[1];
-
 	if ((client < 1) || (client > playerhelpers->GetMaxClients()))
 	{
 		return pContext->ThrowNativeError("Client index %d is invalid", client);
@@ -250,7 +247,7 @@ cell_t GetCookieAccess(IPluginContext *pContext, const cell_t *params)
 	HandleError err;
 	HandleSecurity sec;
  
-	sec.pOwner = NULL;
+	sec.pOwner = nullptr;
 	sec.pIdentity = myself->GetIdentity();
 
 	Cookie *pCookie;
@@ -271,7 +268,7 @@ static cell_t GetCookieIterator(IPluginContext *pContext, const cell_t *params)
 	size_t *iter = new size_t;
 	*iter = 0;
 
-	Handle_t hndl = handlesys->CreateHandle(g_CookieIterator, iter, pContext->GetIdentity(), myself->GetIdentity(), NULL);
+	Handle_t hndl = handlesys->CreateHandle(g_CookieIterator, iter, pContext->GetIdentity(), myself->GetIdentity(), nullptr);
 	if (hndl == BAD_HANDLE)
 	{
 		delete iter;
@@ -290,7 +287,7 @@ static cell_t ReadCookieIterator(IPluginContext *pContext, const cell_t *params)
 	HandleError err;
 	HandleSecurity sec;
 
-	sec.pOwner = NULL;
+	sec.pOwner = nullptr;
 	sec.pIdentity = myself->GetIdentity();
 
 	if ((err = handlesys->ReadHandle(hndl, g_CookieIterator, &sec, (void **)&iter))
@@ -299,19 +296,19 @@ static cell_t ReadCookieIterator(IPluginContext *pContext, const cell_t *params)
 		return pContext->ThrowNativeError("Invalid Cookie iterator handle %x (error %d)", hndl, err);
 	}
 
-	if (*iter >= g_CookieManager.cookieList.length())
+	if (*iter >= g_CookieManager.cookieList.size())
 	{
 		return 0;
 	}
 
-	Cookie *pCookie = g_CookieManager.cookieList[(*iter)++];
+	auto &cookie = g_CookieManager.cookieList[(*iter)++];
 
-	pContext->StringToLocalUTF8(params[2], params[3], pCookie->name, NULL);
-	pContext->StringToLocalUTF8(params[5], params[6], pCookie->description, NULL);
+	pContext->StringToLocalUTF8(params[2], params[3], cookie->name.c_str(), nullptr);
+	pContext->StringToLocalUTF8(params[5], params[6], cookie->description.c_str(), nullptr);
 
 	cell_t *addr;
 	pContext->LocalToPhysAddr(params[4], &addr);
-	*addr = pCookie->access;
+	*addr = cookie->access;
 
 	return 1;
 }
@@ -321,10 +318,10 @@ cell_t ShowSettingsMenu(IPluginContext *pContext, const cell_t *params)
 	g_ClientPrefs.AttemptReconnection();
 
 	char message[256];
-	Translate(message, sizeof(message), "%T:", 2, NULL, "Client Settings", &params[1]);
+	Translate(message, sizeof(message), "%T:", 2, nullptr, "Client Settings", &params[1]);
 
 	g_CookieManager.clientMenu->SetDefaultTitle(message);
-	g_CookieManager.clientMenu->Display(params[1], 0, NULL);
+	g_CookieManager.clientMenu->Display(params[1], 0, nullptr);
 
 	return 0;
 }
@@ -339,7 +336,7 @@ cell_t AddSettingsMenuItem(IPluginContext *pContext, const cell_t *params)
 	/* Register a callback */
 	ItemHandler *pItem = new ItemHandler;
 	pItem->isAutoMenu = false;
-	pItem->forward = forwards->CreateForwardEx(NULL, ET_Ignore, 5, NULL, Param_Cell, Param_Cell, Param_Cell, Param_String, Param_Cell);
+	pItem->forward = forwards->CreateForwardEx(nullptr, ET_Ignore, 5, nullptr, Param_Cell, Param_Cell, Param_Cell, Param_String, Param_Cell);
 
 	pItem->forward->AddFunction(pContext, static_cast<funcid_t>(params[1]));
 
@@ -356,7 +353,7 @@ cell_t AddSettingsMenuItem(IPluginContext *pContext, const cell_t *params)
 	/* Track this in case the plugin unloads */
 
 	IPlugin *pPlugin = plsys->FindPluginByContext(pContext->GetContext());
-	ke::Vector<char *> *pList = NULL;
+	ke::Vector<char *> *pList = nullptr;
 
 	if (!pPlugin->GetProperty("SettingsMenuItems", (void **)&pList, false) || !pList)
 	{
@@ -380,7 +377,7 @@ cell_t AddSettingsPrefabMenuItem(IPluginContext *pContext, const cell_t *params)
 	HandleError err;
 	HandleSecurity sec;
  
-	sec.pOwner = NULL;
+	sec.pOwner = nullptr;
 	sec.pIdentity = myself->GetIdentity();
 
 	Cookie *pCookie;
@@ -400,12 +397,12 @@ cell_t AddSettingsPrefabMenuItem(IPluginContext *pContext, const cell_t *params)
 	/* User passed a function id for a callback */
 	if (params[4] != -1)
 	{
-		pItem->forward = forwards->CreateForwardEx(NULL, ET_Ignore, 5, NULL, Param_Cell, Param_Cell, Param_Cell, Param_String, Param_Cell); 
+		pItem->forward = forwards->CreateForwardEx(nullptr, ET_Ignore, 5, nullptr, Param_Cell, Param_Cell, Param_Cell, Param_String, Param_Cell); 
 		pItem->forward->AddFunction(pContext, static_cast<funcid_t>(params[4]));
 	}
 	else
 	{
-		pItem->forward = NULL;
+		pItem->forward = nullptr;
 	}
 
 	char *display;
@@ -426,7 +423,7 @@ cell_t AddSettingsPrefabMenuItem(IPluginContext *pContext, const cell_t *params)
 	/* Track this in case the plugin unloads */
 
 	IPlugin *pPlugin = plsys->FindPluginByContext(pContext->GetContext());
-	ke::Vector<char *> *pList = NULL;
+	ke::Vector<char *> *pList = nullptr;
 
 	if (!pPlugin->GetProperty("SettingsMenuItems", (void **)&pList, false) || !pList)
 	{
@@ -450,7 +447,7 @@ cell_t GetClientCookieTime(IPluginContext *pContext, const cell_t *params)
 	HandleError err;
 	HandleSecurity sec;
 
-	sec.pOwner = NULL;
+	sec.pOwner = nullptr;
 	sec.pIdentity = myself->GetIdentity();
 
 	Cookie *pCookie;
@@ -547,6 +544,5 @@ sp_nativeinfo_t g_ClientPrefNatives[] =
 	{"Cookie.SetPrefabMenu",        AddSettingsPrefabMenuItem},
 	{"Cookie.GetClientTime",        Cookie_GetClientTime},
 	{"Cookie.AccessLevel.get",      GetCookieAccess},
-
-	{NULL,                          NULL}
+	{nullptr,						nullptr}
 };
