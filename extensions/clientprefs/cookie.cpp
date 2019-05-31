@@ -145,7 +145,7 @@ void CookieManager::OnClientAuthorized(int client, const char *authstring)
 	g_ClientPrefs.AttemptReconnection();
 	
 	TQueryOp *op = new TQueryOp(Query_SelectData, player->GetSerial());
-	UTIL_strncpy(op->m_params.steamId, GetPlayerCompatAuthId(player), MAX_NAME_LENGTH);
+	op->m_params.steamId = GetPlayerCompatAuthId(player);
 
 	g_ClientPrefs.AddQueryToQueue(op);
 }
@@ -186,7 +186,7 @@ void CookieManager::OnClientDisconnecting(int client)
 		/* Send query out */
 		TQueryOp *op = new TQueryOp(Query_InsertData, client);
 
-		UTIL_strncpy(op->m_params.steamId, pAuth, MAX_NAME_LENGTH);
+		op->m_params.steamId = pAuth;
 		op->m_params.cookieId = dbId;
 		op->m_params.data = std::move(data);
 
@@ -260,8 +260,9 @@ void CookieManager::InsertCookieCallback(Cookie *pCookie, int dbId)
 	}
 
 	TQueryOp *op = new TQueryOp(Query_SelectId, pCookie);
+	
 	/* Put the cookie name into the steamId field to save space - Make sure we remember that it's there */
-	UTIL_strncpy(op->m_params.steamId, pCookie->name.c_str(), pCookie->name.length());
+	op->m_params.steamId = pCookie->name;
 	g_ClientPrefs.AddQueryToQueue(op);
 }
 
@@ -288,34 +289,27 @@ void CookieManager::OnPluginDestroyed(IPlugin *plugin)
 	if (plugin->GetProperty("SettingsMenuItems", (void **)&pList, true))
 	{
 		ke::Vector<char *> &menuitems = (*pList);
-		char *name;
-		ItemDrawInfo draw;
-		const char *info;
-		AutoMenuData * data;
-		unsigned itemcount;
-		
 		for (size_t p_iter = 0; p_iter < menuitems.length(); ++p_iter)
 		{
-			name = menuitems[p_iter];
-			itemcount = clientMenu->GetItemCount();
-			//remove from this plugins list
-			for (unsigned int i=0; i < itemcount; i++)
-			{
-				info = clientMenu->GetItemInfo(i, &draw);
+			char *name = menuitems[p_iter];
 
+			//remove from this plugins list
+			size_t itemcount = clientMenu->GetItemCount();
+			for (size_t i = 0; i < itemcount; i++)
+			{
+				ItemDrawInfo draw;
+				const char *info = clientMenu->GetItemInfo(i, &draw);
 				if (info == nullptr)
-				{
 					continue;
-				}
 
 				if (strcmp(draw.display, name) == 0)
 				{
-					data = (AutoMenuData *)strtoul(info, nullptr, 16);
-
+					auto *data = reinterpret_cast<AutoMenuData *>(strtoul(info, nullptr, 16));
 					if (data->handler->forward != nullptr)
 					{
 						forwards->ReleaseForward(data->handler->forward);
 					}
+
 					delete data->handler;
 					delete data;
 
@@ -324,7 +318,7 @@ void CookieManager::OnPluginDestroyed(IPlugin *plugin)
 				}
 			}
 
-			delete [] name;
+			delete []name;
 		}
 		
 		menuitems.clear();

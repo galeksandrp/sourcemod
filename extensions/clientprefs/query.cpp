@@ -75,7 +75,7 @@ void TQueryOp::RunThreadPart()
 		return;
 	}
 	
-	assert(m_database != NULL);
+	assert(m_database != nullptr);
 	/* I don't think this is needed anymore... keeping for now. */
 	m_database->LockForFullAtomicOperation();
 		if (!BindParamsAndRun())
@@ -102,7 +102,7 @@ IdentityToken_t *TQueryOp::GetOwner()
 
 void TQueryOp::Destroy()
 {
-	if (m_pResult != NULL)
+	if (m_pResult != nullptr)
 	{
 		m_pResult->Destroy();
 	}
@@ -113,20 +113,20 @@ TQueryOp::TQueryOp(enum querytype type, int serial)
 {
 	m_type = type;
 	m_serial = serial;
-	m_database = NULL;
-	m_driver = NULL;
+	m_database = nullptr;
+	m_driver = nullptr;
 	m_insertId = -1;
-	m_pResult = NULL;
+	m_pResult = nullptr;
 }
 
 TQueryOp::TQueryOp(enum querytype type, Cookie *cookie)
 {
 	m_type = type;
 	m_pCookie = cookie;
-	m_database = NULL;
-	m_driver = NULL;
+	m_database = nullptr;
+	m_driver = nullptr;
 	m_insertId = -1;
-	m_pResult = NULL;
+	m_pResult = nullptr;
 	m_serial = 0;
 }
 
@@ -192,7 +192,7 @@ bool TQueryOp::BindParamsAndRun()
 		{
 			char safe_str[128];
 
-			m_database->QuoteString(m_params.steamId, safe_str, sizeof(safe_str), &ignore);
+			m_database->QuoteString(m_params.steamId.c_str(), safe_str, sizeof(safe_str), &ignore);
 
 			g_pSM->Format(query,
 				sizeof(query),
@@ -206,7 +206,7 @@ bool TQueryOp::BindParamsAndRun()
 
 			m_pResult = m_database->DoQuery(query);
 
-			return (m_pResult != NULL);
+			return (m_pResult != nullptr);
 		}
 
 		case Query_InsertData:
@@ -214,7 +214,7 @@ bool TQueryOp::BindParamsAndRun()
 			char safe_id[128];
 			char safe_val[MAX_VALUE_LENGTH*2 + 1];
 
-			m_database->QuoteString(m_params.steamId,
+			m_database->QuoteString(m_params.steamId.c_str(),
 				safe_id,
 				sizeof(safe_id),
 				&ignore);
@@ -266,7 +266,7 @@ bool TQueryOp::BindParamsAndRun()
 			char safe_name[MAX_NAME_LENGTH*2 + 1];
 
 			/* the steamId var was actually used to store the name of the cookie - Save duplicating vars */
-			m_database->QuoteString(m_params.steamId, 
+			m_database->QuoteString(m_params.steamId.c_str(), 
 				safe_name,
 				sizeof(safe_name),
 				&ignore);
@@ -278,7 +278,7 @@ bool TQueryOp::BindParamsAndRun()
 
 			m_pResult = m_database->DoQuery(query);
 
-			return (m_pResult != NULL);
+			return (m_pResult != nullptr);
 		}
 
 		default:

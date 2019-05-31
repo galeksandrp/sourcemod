@@ -49,7 +49,6 @@ cell_t RegClientPrefCookie(IPluginContext *pContext, const cell_t *params)
 	pContext->LocalToString(params[2], &desc);
 
 	Cookie *pCookie = g_CookieManager.CreateCookie(name, desc, (CookieAccess)params[3]);
-
 	if (!pCookie)
 	{
 		return BAD_HANDLE;
@@ -152,7 +151,7 @@ cell_t SetAuthIdCookie(IPluginContext *pContext, const cell_t *params)
 	// edit database table
 	TQueryOp *op = new TQueryOp(Query_InsertData, pCookie);
 	// limit player auth length which doubles for cookie name length
-	UTIL_strncpy(op->m_params.steamId, steamID, MAX_NAME_LENGTH);
+	op->m_params.steamId = steamID;
 	op->m_params.cookieId = i_dbId;
 	op->m_params.data = std::move(payload);
 

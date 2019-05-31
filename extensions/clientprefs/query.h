@@ -49,7 +49,6 @@ enum querytype
 
 struct Cookie;
 struct CookieData;
-#define MAX_NAME_LENGTH 30
 
 /* This stores all the info required for our param binding until the thread is executed */
 struct ParamData
@@ -61,7 +60,7 @@ struct ParamData
 	/* Contains a name, description and access for InsertCookie queries */
 	Cookie *cookie;
 	/* A clients steamid - Used for most queries - Doubles as storage for the cookie name*/
-	char steamId[MAX_NAME_LENGTH];
+	std::string steamId;
 
 	int cookieId;
 	std::unique_ptr<CookieData> data;
