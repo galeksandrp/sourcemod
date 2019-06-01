@@ -457,14 +457,13 @@ cell_t GetClientCookieTime(IPluginContext *pContext, const cell_t *params)
 		return pContext->ThrowNativeError("Invalid Cookie handle %x (error %d)", hndl, err);
 	}
 
-	time_t value;
-
-	if (!g_CookieManager.GetCookieTime(pCookie, params[1], &value))
+	time_t out = 0;
+	if (!g_CookieManager.GetCookieTime(pCookie, params[1], out))
 	{
 		return 0;
 	}
 
-	return value;
+	return out;
 }
 
 static cell_t Cookie_Set(IPluginContext *pContext, const cell_t *params)

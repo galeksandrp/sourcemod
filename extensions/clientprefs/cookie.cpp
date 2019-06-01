@@ -35,7 +35,7 @@
 
 CookieManager g_CookieManager;
 
-CookieManager::CookieManager()
+CookieManager::CookieManager() noexcept
 {
 	for (int i=0; i<=SM_MAXPLAYERS; i++)
 	{
@@ -47,9 +47,9 @@ CookieManager::CookieManager()
 	cookieDataLoadedForward = nullptr;
 	clientMenu = nullptr;
 }
-CookieManager::~CookieManager(){}
+CookieManager::~CookieManager() noexcept{}
 
-void CookieManager::Unload()
+void CookieManager::Unload() noexcept
 {
 	/* If clients are connected we should try save their data */
 	for (int i = playerhelpers->GetMaxClients()+1; --i > 0;)
@@ -61,15 +61,15 @@ void CookieManager::Unload()
 	cookieList.clear();
 }
 
-Cookie *CookieManager::FindCookie(const char *name)
+Cookie *CookieManager::FindCookie(std::string const &name) noexcept
 {
 	Cookie *cookie;
-	if (!cookieFinder.retrieve(name, &cookie))
+	if (!cookieFinder.retrieve(name.c_str(), &cookie))
 		return nullptr;
 	return cookie;
 }
 
-Cookie *CookieManager::CreateCookie(const char *name, const char *description, CookieAccess access)
+Cookie *CookieManager::CreateCookie(std::string const &name, std::string const &description, CookieAccess access) noexcept
 {
 	Cookie *pCookie = FindCookie(name);
 
@@ -90,7 +90,7 @@ Cookie *CookieManager::CreateCookie(const char *name, const char *description, C
 	TQueryOp *op = new TQueryOp(Query_InsertCookie, pCookie);
 	op->m_params.cookie = pCookie;
 	
-	cookieFinder.insert(name, pCookie);
+	cookieFinder.insert(name.c_str(), pCookie);
 	cookieList.push_back(std::unique_ptr<Cookie>(pCookie));
 
 	g_ClientPrefs.AddQueryToQueue(op);
@@ -98,7 +98,7 @@ Cookie *CookieManager::CreateCookie(const char *name, const char *description, C
 	return pCookie;
 }
 
-bool CookieManager::GetCookieValue(Cookie *pCookie, int client, std::string &value)
+bool CookieManager::GetCookieValue(Cookie *pCookie, int client, std::string &value) noexcept
 {
 	auto &data = pCookie->data[client];
 
@@ -115,7 +115,7 @@ bool CookieManager::GetCookieValue(Cookie *pCookie, int client, std::string &val
 	return true;
 }
 
-bool CookieManager::SetCookieValue(Cookie *pCookie, int client, std::string const &value)
+bool CookieManager::SetCookieValue(Cookie *pCookie, int client, std::string const &value) noexcept
 {
 	auto &data = pCookie->data[client];
 
@@ -131,7 +131,7 @@ bool CookieManager::SetCookieValue(Cookie *pCookie, int client, std::string cons
 	return true;
 }
 
-void CookieManager::OnClientAuthorized(int client, const char *authstring)
+void CookieManager::OnClientAuthorized(int client, const char *authstring) noexcept
 {
 	IGamePlayer *player = playerhelpers->GetGamePlayer(client);
 	if (player == nullptr)
@@ -150,7 +150,7 @@ void CookieManager::OnClientAuthorized(int client, const char *authstring)
 	g_ClientPrefs.AddQueryToQueue(op);
 }
 
-void CookieManager::OnClientDisconnecting(int client)
+void CookieManager::OnClientDisconnecting(int client) noexcept
 {
 	connected[client] = false;
 	statsLoaded[client] = false;
@@ -185,18 +185,16 @@ void CookieManager::OnClientDisconnecting(int client)
 
 		/* Send query out */
 		TQueryOp *op = new TQueryOp(Query_InsertData, client);
-
 		op->m_params.steamId = pAuth;
 		op->m_params.cookieId = dbId;
 		op->m_params.data = std::move(data);
 
 		g_ClientPrefs.AddQueryToQueue(op);
-
 		data.reset();
 	}
 }
 
-void CookieManager::ClientConnectCallback(int serial, IQuery *data)
+void CookieManager::ClientConnectCallback(int serial, IQuery *data) noexcept
 {
 	/* Check validity of client */
 	int client = playerhelpers->GetClientFromSerial(serial);
@@ -251,7 +249,7 @@ void CookieManager::ClientConnectCallback(int serial, IQuery *data)
 	cookieDataLoadedForward->Execute(nullptr);
 }
 
-void CookieManager::InsertCookieCallback(Cookie *pCookie, int dbId)
+void CookieManager::InsertCookieCallback(Cookie *pCookie, int dbId) noexcept
 {
 	if (dbId > 0)
 	{
@@ -266,7 +264,7 @@ void CookieManager::InsertCookieCallback(Cookie *pCookie, int dbId)
 	g_ClientPrefs.AddQueryToQueue(op);
 }
 
-void CookieManager::SelectIdCallback(Cookie *pCookie, IQuery *data)
+void CookieManager::SelectIdCallback(Cookie *pCookie, IQuery *data) noexcept
 {
 	if (data == nullptr)
 		return;
@@ -282,7 +280,7 @@ void CookieManager::SelectIdCallback(Cookie *pCookie, IQuery *data)
 	row->GetInt(0, &pCookie->dbid);
 }
 
-void CookieManager::OnPluginDestroyed(IPlugin *plugin)
+void CookieManager::OnPluginDestroyed(IPlugin *plugin) noexcept
 {
 	ke::Vector<char *> *pList;
 
@@ -325,7 +323,7 @@ void CookieManager::OnPluginDestroyed(IPlugin *plugin)
 	}
 }
 
-bool CookieManager::GetCookieTime(Cookie *pCookie, int client, time_t *value)
+bool CookieManager::GetCookieTime(Cookie *pCookie, int client, time_t &value) noexcept
 {
 	auto &data = pCookie->data[client];
 
@@ -335,6 +333,6 @@ bool CookieManager::GetCookieTime(Cookie *pCookie, int client, time_t *value)
 		return false;
 	}
 
-	*value = data->timestamp;
+	value = data->timestamp;
 	return true;
 }

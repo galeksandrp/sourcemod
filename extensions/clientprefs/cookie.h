@@ -67,12 +67,12 @@ struct CookieData
 
 struct Cookie
 {
-	Cookie(std::string const &name, std::string const &description, CookieAccess access)
+	Cookie(std::string const &name, std::string const &description, CookieAccess access) noexcept
 	: name(name), description(description), access(access), dbid(-1)
 	{
 	}
 
-	~Cookie()
+	~Cookie() noexcept
 	{
 	}
 
@@ -82,11 +82,11 @@ struct Cookie
 	int dbid;
 	std::unique_ptr<CookieData> data[SM_MAXPLAYERS+1];
 
-	static inline bool matches(const char *name, const Cookie *cookie)
+	static inline bool matches(const char *name, const Cookie *cookie) noexcept
 	{
 		return cookie->name == name;
 	}
-	static inline uint32_t hash(const detail::CharsAndLength &key)
+	static inline uint32_t hash(const detail::CharsAndLength &key) noexcept
 	{
 		return key.hash();
 	}
@@ -98,29 +98,29 @@ public:
 	CookieManager();
 	~CookieManager();
 
-	void OnClientAuthorized(int client, const char *authstring);
-	void OnClientDisconnecting(int client);
+	void OnClientAuthorized(int client, const char *authstring) noexcept;
+	void OnClientDisconnecting(int client) noexcept;
 	
-	bool GetCookieValue(Cookie *pCookie, int client, std::string &value);
-	bool SetCookieValue(Cookie *pCookie, int client, std::string const &value);
-	bool GetCookieTime(Cookie *pCookie, int client, time_t *value);
+	bool GetCookieValue(Cookie *pCookie, int client, std::string &value) noexcept;
+	bool SetCookieValue(Cookie *pCookie, int client, std::string const &value) noexcept;
+	bool GetCookieTime(Cookie *pCookie, int client, time_t &value) noexcept;
 
-	void Unload();
+	void Unload() noexcept;
 
-	void ClientConnectCallback(int serial, IQuery *data);
-	void InsertCookieCallback(Cookie *pCookie, int dbId);
-	void SelectIdCallback(Cookie *pCookie, IQuery *data);
+	void ClientConnectCallback(int serial, IQuery *data) noexcept;
+	void InsertCookieCallback(Cookie *pCookie, int dbId) noexcept;
+	void SelectIdCallback(Cookie *pCookie, IQuery *data) noexcept;
 
-	Cookie *FindCookie(const char *name);
-	Cookie *CreateCookie(const char *name, const char *description, CookieAccess access);
+	Cookie *FindCookie(std::string const &name) noexcept;
+	Cookie *CreateCookie(std::string const &name, std::string const &description, CookieAccess access) noexcept;
 
-	void OnPluginDestroyed(IPlugin *plugin);
+	void OnPluginDestroyed(IPlugin *plugin) noexcept;
 	
-	bool AreClientCookiesCached(int client) {
+	bool AreClientCookiesCached(int client) noexcept {
 		return statsLoaded[client];
 	}
 
-	bool AreClientCookiesPending(int client) {
+	bool AreClientCookiesPending(int client) noexcept {
 		return statsPending[client];
 	}
 public:
