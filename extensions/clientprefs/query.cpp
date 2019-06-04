@@ -78,7 +78,8 @@ void TQueryOp::RunThreadPart()
 	assert(m_database != nullptr);
 	/* I don't think this is needed anymore... keeping for now. */
 	m_database->LockForFullAtomicOperation();
-		if (!BindParamsAndRun())
+	
+	if (!BindParamsAndRun())
 	{
 		g_pSM->LogError(myself, 
 						"Failed SQL Query, Error: \"%s\" (Query id %i - serial %i)", 
@@ -310,7 +311,7 @@ ParamData::~ParamData()
 ParamData::ParamData()
 {
 	cookie = nullptr;
-	steamId[0] = '\0';
+	steamId = "";
 	cookieId = 0;
 }
 

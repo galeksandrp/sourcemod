@@ -303,7 +303,6 @@ void ClientPrefs::DatabaseConnect()
 	return;
 
 fatal_fail:
-	Database->UnlockFromFullAtomicOperation();
 	Database = nullptr;
 	databaseLoading = false;
 }
