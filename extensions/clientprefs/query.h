@@ -47,7 +47,6 @@ enum QueryType
 	Query_Connect,
 };
 
-struct Cookie;
 struct CookieData;
 
 /* This stores all the info required for our param binding until the thread is executed */
