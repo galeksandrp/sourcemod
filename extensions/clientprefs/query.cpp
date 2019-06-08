@@ -110,7 +110,7 @@ void TQueryOp::Destroy()
 	delete this;
 }
 
-TQueryOp::TQueryOp(enum querytype type, int serial)
+TQueryOp::TQueryOp(QueryType type, int serial)
 {
 	m_type = type;
 	m_serial = serial;
@@ -120,7 +120,7 @@ TQueryOp::TQueryOp(enum querytype type, int serial)
 	m_pResult = nullptr;
 }
 
-TQueryOp::TQueryOp(enum querytype type, Cookie *cookie)
+TQueryOp::TQueryOp(QueryType type, Cookie *cookie)
 {
 	m_type = type;
 	m_pCookie = cookie;
@@ -292,26 +292,5 @@ bool TQueryOp::BindParamsAndRun()
 	assert(false);
 
 	return false;
-}
-
-querytype TQueryOp::PullQueryType()
-{
-	return m_type;
-}
-
-int TQueryOp::PullQuerySerial()
-{
-	return m_serial;
-}
-
-ParamData::~ParamData()
-{
-}
-
-ParamData::ParamData()
-{
-	cookie = nullptr;
-	steamId = "";
-	cookieId = 0;
 }
 

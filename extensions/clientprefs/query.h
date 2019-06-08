@@ -38,7 +38,7 @@
 
 #include <memory>
 
-enum querytype
+enum QueryType
 {
 	Query_InsertCookie = 0,
 	Query_SelectData,
@@ -53,51 +53,57 @@ struct CookieData;
 /* This stores all the info required for our param binding until the thread is executed */
 struct ParamData
 {
-	ParamData();
+	ParamData() : cookie(nullptr), cookieId(0) {
+		
+	}
 
-	~ParamData();
+	~ParamData() {
+	}
 
 	/* Contains a name, description and access for InsertCookie queries */
 	Cookie *cookie;
+	int cookieId;
 	/* A clients steamid - Used for most queries - Doubles as storage for the cookie name*/
 	std::string steamId;
 
-	int cookieId;
 	std::unique_ptr<CookieData> data;
 };
 
 class TQueryOp : public IDBThreadOperation
 {
 public:
-	TQueryOp(enum querytype type, int serial);
-	TQueryOp(enum querytype type, Cookie *cookie);
+	TQueryOp(QueryType type, int serial);
+	TQueryOp(QueryType type, Cookie *cookie);
 	~TQueryOp() {}
 
-	IDBDriver *GetDriver();
-	IdentityToken_t *GetOwner();
-
 	void SetDatabase(IDatabase *db);
-
-	void Destroy();
-
-	void RunThreadPart();
-	/* Thread has been cancelled due to driver unloading. Nothing else to do? */
-	void CancelThinkPart()	{}
-	void RunThinkPart();
-
 	bool BindParamsAndRun();
 
-	/* Params to be bound */
-	ParamData m_params;
-
-	inline IDatabase *GetDB()
+	IDatabase *GetDB()
 	{
 		return m_database;
 	}
-	
+
+	QueryType PullQueryType() {
+		return m_type;
+	}
+
+	int PullQuerySerial() {
+		return m_serial;
+	}
+
+public:	
+	// IDBThreadOperation
+	IDBDriver *GetDriver();
+	IdentityToken_t *GetOwner();
+	void Destroy();
+	void RunThreadPart();
+	void CancelThinkPart()	{} // thread cancelled, nothing else to do?
+	void RunThinkPart();
+
 public:
-	querytype PullQueryType();
-	int PullQuerySerial();
+	/* Params to be bound */
+	ParamData m_params;
 
 private:
 	IDatabase *m_database;
@@ -105,7 +111,7 @@ private:
 	IQuery *m_pResult;
 
 	/* Query type */
-	enum querytype m_type;
+	QueryType m_type;
 
 	/* Data to be passed to the callback */
 	int m_serial;
